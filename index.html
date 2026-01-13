@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <title>黑色生命力</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root{
+      --bg:#000;
+      --panel:#0b0b0b;
+      --line:#222;
+      --text:#fff;
+      --muted:#bdbdbd;
+      --ok:#49ff9a;
+      --warn:#ffd24a;
+      --no:#ff5b5b;
+      --btn:#111;
+      --btn2:#151515;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial;
+      -webkit-font-smoothing:antialiased;
+      padding:18px 14px 26px;
+    }
+    header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .title{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    h1{margin:0; font-size:22px; letter-spacing:1px}
+    .subtitle{color:var(--muted); font-size:13px; line-height:1.25}
+    .pill{
+      border:1px solid var(--line);
+      background:var(--panel);
+      padding:8px 10px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    nav{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin:10px 0 14px;
+    }
+    .tab{
+      padding:10px 8px;
+      border-radius:12px;
+      background:var(--btn);
+      border:1px solid var(--line);
+      color:var(--muted);
+      text-align:center;
+      font-size:13px;
+      user-select:none;
+    }
+    .tab.active{
+      background:var(--btn2);
+      color:var(--text);
+      border-color:#333;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .grow{flex:1}
+    label{display:block; color:var(--muted); font-size:12px; margin:10px 0 6px}
+    input, textarea, select{
+      width:100%;
+      background:#000;
+      border:1px solid #333;
+      color:var(--text);
+      border-radius:12px;
+      padding:11px 12px;
+      font-size:15px;
+      outline:none;
+    }
+    textarea{min-height:92px; resize:vertical}
+    .btn{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid #333;
+      background:var(--btn2);
+      color:var(--text);
+      font-size:15px;
+    }
+    .btn.secondary{background:transparent; color:var(--muted)}
+    .btn.danger{border-color:#402; background:#140000; color:#ffd0d0}
+    .btn.small{width:auto; padding:8px 10px; font-size:13px; border-radius:999px}
+
+    .list{display:flex; flex-direction:column; gap:10px; margin-top:10px}
+    .item{
+      border:1px solid #2a2a2a;
+      border-radius:12px;
+      padding:10px 10px;
+      background:#050505;
+    }
+    .meta{display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:12px}
+    .text{margin-top:6px; white-space:pre-wrap; line-height:1.35}
+    .tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .tag{
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid #333;
+      color:var(--muted);
+      background:#090909;
+    }
+    .tag.ok{border-color:#1e4; color:var(--ok)}
+    .tag.warn{border-color:#aa0; color:var(--warn)}
+    .tag.no{border-color:#a22; color:var(--no)}
+    .split{height:1px; background:var(--line); margin:12px 0}
+    .hint{color:var(--muted); font-size:12px; line-height:1.35}
+    .right{margin-left:auto}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>🖤 黑色生命力</h1>
+    <div class="subtitle">今天，我在为哪种生命力付出？</div>
+  </div>
+  <div class="pill" id="todayPill"></div>
+</header>
+
+<nav>
+  <div class="tab active" data-tab="ach">成就</div>
+  <div class="tab" data-tab="mood">情绪</div>
+  <div class="tab" data-tab="money">花钱</div>
+  <div class="tab" data-tab="year">年坐标</div>
+</nav>
+
+<!-- 成就 -->
+<section id="tab-ach">
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <label>我今天完成了什么？（一句话就行）</label>
+        <input id="achText" placeholder="例如：完成一份报表 / 去徒步 / 写了500字" />
+      </div>
+    </div>
+
+    <label>这件事更像哪种？</label>
+    <div class="row">
+      <select id="achType">
+        <option value="黑色生命力">🖤 黑色生命力（长期价值）</option>
+        <option value="积累型">🌱 积累型（慢慢变强）</option>
+        <option value="即时完成">⚡ 即时完成（短期爽感）</option>
+      </select>
+      <button class="btn small" id="achToYearBtn" title="下一条成就将同时加入年度坐标">加入年度</button>
+      <span class="hint">点一次“加入年度”，本条成就会进今年的坐标轴。</span>
+    </div>
+
+    <div style="margin-top:12px" class="row">
+      <button class="btn" id="achSave">记录成就</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <div class="hint">成就不是待办，是<strong>已完成</strong>。你只要留下“我做成了什么”。</div>
+      </div>
+      <button class="btn small danger" id="achClear">清空成就</button>
+    </div>
+    <div class="list" id="achList"></div>
+  </div>
+</section>
+
+<!-- 情绪 -->
+<section id="tab-mood" class="hidden">
+  <div class="card">
+    <label>发生了什么事？</label>
+    <textarea id="mEvent" placeholder="例如：他没回消息 / 工作被催 / 家里争执"></textarea>
+
+    <label>它让我产生了什么情绪？</label>
+    <select id="mFeeling">
+      <option value="焦虑">焦虑</option>
+      <option value="委屈">委屈</option>
+      <option value="愤怒">愤怒</option>
+      <option value="空">空</option>
+      <option value="悲伤">悲伤</option>
+      <option value="平静">平静</option>
+      <option value="有力量">有力量</option>
+    </select>
+
+    <label>我是怎么处理的？</label>
+    <select id="mHandle">
+      <option value="还没处理">还没处理</option>
+      <option value="逃避了">逃避了</option>
+      <option value="硬扛">硬扛</option>
+      <option value="解决了">解决了</option>
+      <option value="接受了">接受了</option>
+      <option value="转移了">转移了</option>
+    </select>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="mSave">记录情绪</button>
+      <button class="btn small" id="mToYearBtn">本条加入年度</button>
+    </div>
+    <div class="hint" style="margin-top:8px">“加入年度”适合：能代表你今年关系/情绪模式的一条。</div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="grow hint">你不是要变“更好”，你是要变“更懂自己”。</div>
+      <button class="btn small danger" id="mClear">清空情绪</button>
+    </div>
+    <div class="list" id="mList"></div>
+  </div>
+</section>
+
+<!-- 花钱 -->
+<section id="tab-money" class="hidden">
+  <div class="card">
+    <label>花了多少钱？</label>
+    <input id="pAmount" inputmode="decimal" placeholder="例如：58.5" />
+
+    <label>花在什么上？</label>
+    <input id="pWhat" placeholder="例如：药 / 外卖 / 课程 / 交通" />
+
+    <label>这笔钱对我来说：</label>
+    <select id="pWorth">
+      <option value="可不花">❌ 可不花</option>
+      <option value="中性">⚠️ 中性</option>
+      <option value="值得花">✅ 值得花</option>
+    </select>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="pSave">记录花钱</button>
+      <button class="btn small" id="pToYearBtn">本条加入年度</button>
+    </div>
+
+    <div class="split"></div>
+
+    <div class="row">
+      <div class="grow">
+        <div class="hint"><strong>本月花费汇总</strong></div>
+        <div class="hint" id="monthSummary">—</div>
+      </div>
+      <button class="btn small secondary" id="refreshMonth">刷新</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="grow hint">你不是为了抠，而是为了拥有“选择感”。</div>
+      <button class="btn small danger" id="pClear">清空花钱</button>
+    </div>
+    <div class="list" id="pList"></div>
+  </div>
+</section>
+
+<!-- 年坐标 -->
+<section id="tab-year" class="hidden">
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <div class="hint"><strong>年度坐标轴</strong>：留下能代表今年的事。</div>
+        <div class="hint" id="yearHint"></div>
+      </div>
+      <button class="btn small secondary" id="exportBtn">导出</button>
+      <button class="btn small secondary" id="importBtn">导入</button>
+      <button class="btn small danger" id="yClear">清空年度</button>
+    </div>
+
+    <div class="split"></div>
+    <div class="hint">你可以把“成就/情绪/花钱”的某一条点进年度。年度只需要少而精。</div>
+    <div class="list" id="yList"></div>
+
+    <input id="fileInput" type="file" accept="application/json" class="hidden" />
+  </div>
+</section>
+
+<script>
+  // ---------- 基础工具 ----------
+  const $ = (id) => document.getElementById(id);
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  const todayKey = `${yyyy}-${mm}-${dd}`;
+  $('todayPill').textContent = `${yyyy}年${mm}月${dd}日`;
+
+  const KEYS = {
+    ach: 'blf_achievements_v1',
+    mood: 'blf_moods_v1',
+    pay: 'blf_payments_v1',
+    year: 'blf_year_v1'
+  };
+
+  function load(key){
+    try{ return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch(e){ return []; }
+  }
+  function save(key, arr){
+    localStorage.setItem(key, JSON.stringify(arr));
+  }
+  function uid(){
+    return Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+  function fmtDate(d){
+    // d is yyyy-mm-dd
+    return d.replaceAll('-', '/');
+  }
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Tabs ----------
+  const tabs = document.querySelectorAll('.tab');
+  const sections = {
+    ach: $('tab-ach'),
+    mood: $('tab-mood'),
+    money: $('tab-money'),
+    year: $('tab-year')
+  };
+  function openTab(name){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    Object.entries(sections).forEach(([k,el]) => el.classList.toggle('hidden', k !== name));
+    if(name === 'money') updateMonthSummary();
+    if(name === 'year') updateYearHint();
+  }
+  tabs.forEach(t => t.addEventListener('click', ()=>openTab(t.dataset.tab)));
+
+  // ---------- 渲染 ----------
+  function renderAchievements(){
+    const arr = load(KEYS.ach).slice().reverse();
+    const box = $('achList');
+    box.innerHTML = arr.length ? '' : `<div class="hint">还没有成就记录。先记录一条“我做成了什么”。</div>`;
+    arr.forEach(x=>{
+      box.innerHTML += `
+        <div class="item">
+          <div class="meta"><span>${fmtDate(x.date)}</span><span>${escapeHtml(x.type)}</span></div>
+          <div class="text">${escapeHtml(x.text)}</div>
+          <div class="tags">
+            <span class="tag ${x.toYear?'ok':''}">${x.toYear?'已加入年度':'未加入年度'}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  function renderMoods(){
+    const arr = load(KEYS.mood).slice().reverse();
+    const box = $('mList');
+    box.innerHTML = arr.length ? '' : `<div class="hint">还没有情绪记录。写下“发生了什么 → 情绪 → 处理方式”。</div>`;
+    arr.forEach(x=>{
+      box.innerHTML += `
+        <div class="item">
+          <div class="meta"><span>${fmtDate(x.date)}</span><span>${escapeHtml(x.feeling)} · ${escapeHtml(x.handle)}</span></div>
+          <div class="text">${escapeHtml(x.event)}</div>
+          <div class="tags">
+            <span class="tag ${x.toYear?'ok':''}">${x.toYear?'已加入年度':'未加入年度'}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  function renderPayments(){
+    const arr = load(KEYS.pay).slice().reverse();
+    const box = $('pList');
+    box.innerHTML = arr.length ? '' : `<div class="hint">还没有花钱记录。记一笔“多少钱 + 花在什么 + 值不值得”。</div>`;
+    arr.forEach(x=>{
+      const cls = x.worth === '值得花' ? 'ok' : (x.worth === '中性' ? 'warn' : 'no');
+      box.innerHTML += `
+        <div class="item">
+          <div class="meta"><span>${fmtDate(x.date)}</span><span>¥${Number(x.amount).toFixed(2)}</span></div>
+          <div class="text">${escapeHtml(x.what)}</div>
+          <div class="tags">
+            <span class="tag ${cls}">${escapeHtml(x.worth)}</span>
+            <span class="tag ${x.toYear?'ok':''}">${x.toYear?'已加入年度':'未加入年度'}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  function renderYear(){
+    const arr = load(KEYS.year).slice().reverse();
+    const box = $('yList');
+    box.innerHTML = arr.length ? '' : `<div class="hint">年度坐标还是空的。你可以从“成就/情绪/花钱”里把代表性的条目加入进来。</div>`;
+    arr.forEach(x=>{
+      const tag = x.kind === '成就' ? 'ok' : (x.kind === '花钱' ? 'warn' : '');
+      box.innerHTML += `
+        <div class="item">
+          <div class="meta"><span>${fmtDate(x.date)}</span><span>${escapeHtml(x.kind)}</span></div>
+          <div class="text">${escapeHtml(x.text)}</div>
+          ${x.extra ? `<div class="tags"><span class="tag ${tag}">${escapeHtml(x.extra)}</span></div>` : ''}
+        </div>`;
+    });
+  }
+
+  // ---------- 成就 ----------
+  let nextAchToYear = false;
+  $('achToYearBtn').addEventListener('click', ()=>{
+    nextAchToYear = !nextAchToYear;
+    $('achToYearBtn').textContent = nextAchToYear ? '已选年度' : '加入年度';
+    $('achToYearBtn').style.borderColor = nextAchToYear ? '#3a3' : '#333';
+  });
+
+  $('achSave').addEventListener('click', ()=>{
+    const text = $('achText').value.trim();
+    if(!text){ alert('先写一句：我今天完成了什么'); return; }
+    const type = $('achType').value;
+    const arr = load(KEYS.ach);
+    const item = { id: uid(), date: todayKey, text, type, toYear: nextAchToYear };
+    arr.push(item); save(KEYS.ach, arr);
+
+    if(nextAchToYear){
+      const y = load(KEYS.year);
+      y.push({ id: uid(), date: todayKey, kind:'成就', text: `${type}｜${text}`, extra: type });
+      save(KEYS.year, y);
+    }
+
+    $('achText').value = '';
+    nextAchToYear = false;
+    $('achToYearBtn').textContent = '加入年度';
+    $('achToYearBtn').style.borderColor = '#333';
+
+    renderAchievements(); renderYear(); updateYearHint();
+    alert('已记录 🖤');
+  });
+
+  $('achClear').addEventListener('click', ()=>{
+    if(confirm('确定清空所有成就记录？')){
+      save(KEYS.ach, []);
+      renderAchievements();
+    }
+  });
+
+  // ---------- 情绪 ----------
+  let nextMoodToYear = false;
+  $('mToYearBtn').addEventListener('click', ()=>{
+    nextMoodToYear = !nextMoodToYear;
+    $('mToYearBtn').textContent = nextMoodToYear ? '已选年度' : '本条加入年度';
+    $('mToYearBtn').style.borderColor = nextMoodToYear ? '#3a3' : '#333';
+  });
+
+  $('mSave').addEventListener('click', ()=>{
+    const event = $('mEvent').value.trim();
+    if(!event){ alert('先写：发生了什么事？'); return; }
+    const feeling = $('mFeeling').value;
+    const handle = $('mHandle').value;
+
+    const arr = load(KEYS.mood);
+    const item = { id: uid(), date: todayKey, event, feeling, handle, toYear: nextMoodToYear };
+    arr.push(item); save(KEYS.mood, arr);
+
+    if(nextMoodToYear){
+      const y = load(KEYS.year);
+      y.push({ id: uid(), date: todayKey, kind:'情绪', text: `事件：${event}\n情绪：${feeling}\n处理：${handle}`, extra: `${feeling}·${handle}` });
+      save(KEYS.year, y);
+    }
+
+    $('mEvent').value = '';
+    nextMoodToYear = false;
+    $('mToYearBtn').textContent = '本条加入年度';
+    $('mToYearBtn').style.borderColor = '#333';
+
+    renderMoods(); renderYear(); updateYearHint();
+    alert('已记录 🖤');
+  });
+
+  $('mClear').addEventListener('click', ()=>{
+    if(confirm('确定清空所有情绪记录？')){
+      save(KEYS.mood, []);
+      renderMoods();
+    }
+  });
+
+  // ---------- 花钱 ----------
+  let nextPayToYear = false;
+  $('pToYearBtn').addEventListener('click', ()=>{
+    nextPayToYear = !nextPayToYear;
+    $('pToYearBtn').textContent = nextPayToYear ? '已选年度' : '本条加入年度';
+    $('pToYearBtn').style.borderColor = nextPayToYear ? '#3a3' : '#333';
+  });
+
+  $('pSave').addEventListener('click', ()=>{
+    const amountStr = $('pAmount').value.trim();
+    const what = $('pWhat').value.trim();
+    if(!amountStr || isNaN(Number(amountStr))){ alert('先填正确金额（数字）'); return; }
+    if(!what){ alert('先写：花在什么上'); return; }
+
+    const worth = $('pWorth').value;
+    const amount = Number(amountStr);
+
+    const arr = load(KEYS.pay);
+    const item = { id: uid(), date: todayKey, amount, what, worth, toYear: nextPayToYear };
+    arr.push(item); save(KEYS.pay, arr);
+
+    if(nextPayToYear){
+      const y = load(KEYS.year);
+      y.push({ id: uid(), date: todayKey, kind:'花钱', text: `¥${amount.toFixed(2)}｜${what}｜${worth}`, extra: worth });
+      save(KEYS.year, y);
+    }
+
+    $('pAmount').value = '';
+    $('pWhat').value = '';
+    nextPayToYear = false;
+    $('pToYearBtn').textContent = '本条加入年度';
+    $('pToYearBtn').style.borderColor = '#333';
+
+    renderPayments(); renderYear(); updateMonthSummary(); updateYearHint();
+    alert('已记录 🖤');
+  });
+
+  $('refreshMonth').addEventListener('click', updateMonthSummary);
+
+  $('pClear').addEventListener('click', ()=>{
+    if(confirm('确定清空所有花钱记录？')){
+      save(KEYS.pay, []);
+      renderPayments();
+      updateMonthSummary();
+    }
+  });
+
+  function updateMonthSummary(){
+    const arr = load(KEYS.pay);
+    const prefix = `${yyyy}-${mm}-`;
+    const monthArr = arr.filter(x => (x.date || '').startsWith(prefix));
+    const sum = monthArr.reduce((a,x)=>a+(Number(x.amount)||0),0);
+    const worth = monthArr.filter(x=>x.worth==='值得花').reduce((a,x)=>a+(Number(x.amount)||0),0);
+    const no = monthArr.filter(x=>x.worth==='可不花').reduce((a,x)=>a+(Number(x.amount)||0),0);
+    $('monthSummary').textContent =
+      monthArr.length
+      ? `本月记录 ${monthArr.length} 笔｜总计 ¥${sum.toFixed(2)}｜值得花 ¥${worth.toFixed(2)}｜可不花 ¥${no.toFixed(2)}`
+      : '本月还没有花钱记录。';
+  }
+
+  // ---------- 年坐标 ----------
+  function updateYearHint(){
+    const y = load(KEYS.year);
+    $('yearHint').textContent = `今年（${yyyy}）已收录 ${y.length} 条。`;
+  }
+
+  $('yClear').addEventListener('click', ()=>{
+    if(confirm('确定清空年度坐标？（不会清空成就/情绪/花钱原始记录）')){
+      save(KEYS.year, []);
+      renderYear();
+      updateYearHint();
+    }
+  });
+
+  // 导出/导入（防止你以后换手机丢数据）
+  $('exportBtn').addEventListener('click', ()=>{
+    const data = {
+      version:'blf_v1',
+      exportedAt: new Date().toISOString(),
+      achievements: load(KEYS.ach),
+      moods: load(KEYS.mood),
+      payments: load(KEYS.pay),
+      year: load(KEYS.year)
+    };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `黑色生命力_${yyyy}${mm}${dd}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  $('importBtn').addEventListener('click', ()=> $('fileInput').click());
+
+  $('fileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files?.[0];
+    if(!file) return;
+    try{
+      const text = await file.text();
+      const obj = JSON.parse(text);
+      if(!obj || obj.version !== 'blf_v1') throw new Error('文件格式不对');
+      save(KEYS.ach, obj.achievements||[]);
+      save(KEYS.mood, obj.moods||[]);
+      save(KEYS.pay, obj.payments||[]);
+      save(KEYS.year, obj.year||[]);
+      renderAchievements(); renderMoods(); renderPayments(); renderYear();
+      updateMonthSummary(); updateYearHint();
+      alert('导入成功 🖤');
+    }catch(err){
+      alert('导入失败：请确认你选的是导出的json文件');
+    }finally{
+      e.target.value = '';
+    }
+  });
+
+  // ---------- 初始化 ----------
+  renderAchievements();
+  renderMoods();
+  renderPayments();
+  renderYear();
+  updateMonthSummary();
+  updateYearHint();
+
+  // ---------- 注册 Service Worker（离线） ----------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
